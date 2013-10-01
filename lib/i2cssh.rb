@@ -2,6 +2,7 @@ require 'appscript'
 
 class I2Cssh
     def initialize servers, ssh_options, i2_options, ssh_environment
+        @initializer_command = i2_options.delete(:initializer)
         @ssh_prefix         = "ssh " + ssh_options.join(' ')
         @ssh_options        = ssh_options
         @i2_options         = i2_options
@@ -27,7 +28,7 @@ class I2Cssh
         compute_geometry
         split_session
         maximize if i2_options[:fullscreen]
-        
+
         start_ssh
         enable_broadcast if i2_options[:broadcast]
     end
@@ -108,9 +109,11 @@ class I2Cssh
                 if @i2_options[:sleep] then
                     sleep @i2_options[:sleep] * i
                 end
-                @term.sessions[i].write :text => "unset HISTFILE && echo -e \"\\033]50;SetProfile=#{@profile}\\a\" && #{@ssh_prefix} #{send_env} #{server}"
+                command = "unset HISTFILE && echo -e \"\\033]50;SetProfile=#{@profile}\\a\" && #{@ssh_prefix} #{send_env} #{server}"
+                command << " #{@initializer_command}" if @initializer_command
+                @term.sessions[i].write :text => command
             else
-                
+
                 @term.sessions[i].write :text => "unset HISTFILE && echo -e \"\\033]50;SetProfile=#{@profile}\\a\""
                 sleep 0.3
                 @term.sessions[i].foreground_color.set "red"

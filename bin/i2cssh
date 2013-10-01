@@ -166,6 +166,10 @@ optparse = OptionParser.new do |opts|
 
          ssh_options << "-" + x.split("=").join(" ")
     end
+    opts.on '-I', '--initializer COMMAND', String,
+        'Quoted initialization command to run on the remote machines e.g. -I "ls -al")' do |i|
+         opts_from_cmdline[:initializer] = i
+    end
 
 end
 optparse.parse!
